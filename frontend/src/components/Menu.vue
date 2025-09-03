@@ -1,14 +1,14 @@
 <script lang="ts">
 import {defineComponent, ref} from 'vue'
 import { RouterLink, RouterView } from 'vue-router';
+import { store } from "../store";
+
+
 
 export default defineComponent({
   name: "Menu",
-  props: {
-    isConnected: {
-      type: Boolean,
-      required: true,
-    }
+  data() {
+    return {store: store}
   },
   setup() {
     const isOpen = ref(false)
@@ -40,10 +40,10 @@ export default defineComponent({
               <a href="#" class="hover:text-gray-300 transition">Publier</a>
             </RouterLink>
             <RouterLink to="/connect">
-              <a v-if="!isConnected" href="#" class="hover:text-gray-300 transition">Se connecter</a>
+              <a v-if="!store.is_connected" href="#" class="hover:text-gray-300 transition">Se connecter</a>
             </RouterLink>
             <RouterLink to="/account">
-              <a v-if="isConnected" href="#" class="hover:text-gray-300 transition">Mon compte</a>
+              <a v-if="store.is_connected" href="#" class="hover:text-gray-300 transition">Mon compte</a>
             </RouterLink>
           </nav>
 
@@ -74,10 +74,10 @@ export default defineComponent({
           <a href="#" class="block px-3 py-2 rounded hover:bg-gray-600 transition">Publier</a>
         </RouterLink>
         <RouterLink to="/connect">
-          <a v-if="!isConnected" href="#" class="block px-3 py-2 rounded hover:bg-gray-600 transition">Se connecter</a>
+          <a v-if="!store.is_connected" href="#" class="block px-3 py-2 rounded hover:bg-gray-600 transition">Se connecter</a>
         </RouterLink>
         <RouterLink to="/account">
-          <a v-if="isConnected" class="block px-3 py-2 rounded hover:bg-gray-600 transition">Mon compte</a>
+          <a v-if="store.is_connected" class="block px-3 py-2 rounded hover:bg-gray-600 transition">Mon compte</a>
         </RouterLink>
       </nav>
     </header>

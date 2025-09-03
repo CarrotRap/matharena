@@ -1,7 +1,7 @@
 <template>
   <div class="connection bg-gray-100">
     <div class="connection-container">
-      <div class="bg-white rounded-xl shadow-lg p-6">
+      <div class="bg-white rounded-xl shadow-lg p-6 w-35%">
         <div v-if="is_new">
           <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">
             Connexion
@@ -11,6 +11,7 @@
             <div>
               <label class="block text-sm font-medium text-gray-700">Nom d'utilisateur</label>
               <input
+                  ref="login_username"
                   type="text"
                   placeholder="fou_des_maths"
                   class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
@@ -21,7 +22,7 @@
             <div>
               <label for="password" class="block text-sm font-medium text-gray-700">Mot de passe</label>
               <input
-
+                  ref="login_password"
                   type="password"
                   id="password"
                   placeholder="********"
@@ -29,6 +30,7 @@
                   required
               />
             </div>
+            <label class="block text-sm font-xs text-gray-500">{{ info_connect }}</label>
 
             <button
                 @click="connect"
@@ -47,6 +49,7 @@
             <div>
               <label class="block text-sm font-medium text-gray-700">Nom d'utilisateur</label>
               <input
+                  ref="register_username"
                   type="text"
                   placeholder="fou_du_bus"
                   class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
@@ -57,6 +60,7 @@
             <div>
               <label class="block text-sm font-medium text-gray-700">Mot de passe</label>
               <input
+                  ref="register_password"
                   @input="check_password"
                   type="password"
                   placeholder="********"
@@ -69,6 +73,7 @@
             <div>
               <label class="block text-sm font-medium text-gray-700">Confirmation mot de passe</label>
               <input
+                  ref="register_password_confirm"
                   @input="same_password"
                   type="password"
                   placeholder="********"
@@ -103,6 +108,10 @@
 <script lang="ts">
 import {defineComponent} from 'vue'
 import { passwordStrength } from "check-password-strength";
+import axios from 'axios';
+import Cookies from 'js-cookie';
+import {store} from "../store";
+
 
 export default defineComponent({
   name: "ConnectionView",
@@ -112,7 +121,8 @@ export default defineComponent({
       info_password: '',
       info_password_confirm: '',
       timeout_id: 0,
-      password: ''
+      password: '',
+      info_connect: ''
     }
   },
   methods: {
@@ -141,10 +151,55 @@ export default defineComponent({
       }
     },
     connect() {
-      console.log('connection')
+      axios.post('/api/login', {
+        username: this.$refs.login_username.value,
+        password: this.$refs.login_password.value
+      }).then(res => {
+        if(res.data.error == undefined) {
+          Cookies.set('token', res.data.token)
+          store.is_connected = true
+          this.$router.push('/')
+        } else {
+          this.$refs.login_username.value = '';
+          this.$refs.login_password.value = '';
+          this.info_connect = 'Identifiant et/ou mot de passe incorrects';
+          setTimeout(() => {this.info_connect = ''}, 3000);
+        }
+      })
     },
     register() {
-      console.log('register')
+      if(this.$refs.register_password.value != this.$refs.register_password_confirm.value) {
+        this.info_password_confirm = 'Pas le même mot de passe'
+      } else {
+        axios.post('/api/signin', {
+          username: this.$refs.register_username.value,
+          password: this.$refs.register_password.value
+        }).then(res => {
+          if (res.data.error_code != undefined) {
+            if (res.data.error_code == 0) {
+              this.info_password = 'Vous devez remplir les champs.';
+            }
+            if (res.data.error_code == 1) {
+              this.info_password = 'Le nom d\'utilisateur doit faire au moins 6 caractères.';
+            }
+            if (res.data.error_code == 2) {
+              this.info_password = 'Mot de passe trop faible.';
+            }
+            if (res.data.error_code == 3) {
+              this.info_password = 'Ce pseudo existe déjà';
+            }
+
+            clearTimeout(this.timeout_id)
+            this.timeout_id = setTimeout(() => {
+              this.info_password = ''
+            }, 3000)
+          } else {
+            Cookies.set('token', res.data.token)
+            store.is_connected = true
+            this.$router.push('/')
+          }
+        })
+      }
     }
   }
 })

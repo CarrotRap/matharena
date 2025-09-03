@@ -1,13 +1,22 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import Menu from "./components/Menu.vue";
-import { ref } from "vue";
+import axios from "axios";
+import Cookies from "js-cookie";
+import {store} from "./store";
 
-let isConnected = ref(false);
+axios.get('/api/info', {
+  headers: {'Authorization': Cookies.get('token')}
+}).then(res => {
+  if(res.data.error == undefined) {
+    store.is_connected = true;
+  }
+});
+
 </script>
 
 <template>
-    <Menu :isConnected="isConnected"/>
+    <Menu/>
 
     <div class="main">
       <RouterView />

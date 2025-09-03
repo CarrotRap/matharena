@@ -7,15 +7,17 @@
     "node": "^20.19.0 || >=22.12.0"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "run-p type-check \"build-only {@}\" --",
-    "preview": "vite preview",
-    "build-only": "vite build",
-    "type-check": "vue-tsc --build"
+    "dev": "../node_modules/.bin/vite",
+    "build": "../node_modules/.bin/run-p type-check \"build-only {@}\" --",
+    "preview": "../node_modules/.bin/vite preview",
+    "build-only": "../node_modules/.bin/vite build",
+    "type-check": "../node_modules/.bin/vue-tsc --build"
   },
   "dependencies": {
     "@unocss/reset": "^66.4.2",
+    "axios": "^1.11.0",
     "check-password-strength": "^3.0.0",
+    "js-cookie": "^3.0.5",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1"
   },
